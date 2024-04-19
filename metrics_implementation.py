@@ -283,3 +283,18 @@ class GuessedPercentage(Metric):
                 "guessed_percentage": guessed_percentage.values,
             }
         )
+
+
+### EXAMPLE
+
+# course_id = 1316
+# mtc = MeanTriesCount(metric_name='mean_tries_count', data_tables={'user_element_progress': user_element_progress}, 
+#                     parameters={'outlier': 65, 'course_id': course_id}, threshold=4)
+# std = TriesStd(metric_name='tries_std', data_tables={'user_element_progress': user_element_progress}, 
+#                     parameters={'outlier': 65, 'course_id': course_id}, threshold=5)
+# skips = SkipsPercentage(metric_name='skips_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element}, 
+#                     parameters={'course_id': course_id}, threshold=0.2)
+# lost = LostPercentage(metric_name='lost_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element}, 
+#                     parameters={'course_id': course_id}, threshold=0.15)
+# guess = GuessedPercentage(metric_name='guessed_percentage', data_tables={'user_element_progress': user_element_progress, 'solution_log': solution_log}, 
+#                     parameters={'course_id': course_id}, threshold=0.2)
