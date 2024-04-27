@@ -53,11 +53,13 @@ class MeanTriesCount(Metric):
         df_filtered = df[df["tries_count"] > 0]
         return df_filtered
 
-    def evaluate(self, *args, **kwargs):
-        user_element_progress = self.data_tables["user_element_progress"][
-            self.data_tables["user_element_progress"]["course_id"]
-            == self.parameters["course_id"]
-        ]
+    def evaluate(self, course_id=None, *args, **kwargs):
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
         outlier_threshold = self.parameters["outlier"]
         df_filtered = self.filter_df(user_element_progress, outlier_threshold)
         mean_tries = (
@@ -79,12 +81,14 @@ class TriesStd(Metric):
         df_filtered = df[df["tries_count"] > 0]
         return df_filtered
 
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, course_id=None, *args, **kwargs):
         outlier_threshold = self.parameters["outlier"]
-        user_element_progress = self.data_tables["user_element_progress"][
-            self.data_tables["user_element_progress"]["course_id"]
-            == self.parameters["course_id"]
-        ]
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
         df_filtered = self.filter_df(user_element_progress, outlier_threshold)
         tries_std = (
             df_filtered[["course_element_id", "tries_count"]]
@@ -97,7 +101,7 @@ class TriesStd(Metric):
 
 
 class SkipsPercentage(Metric):
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, course_id=None, *args, **kwargs):
         course_element = self.data_tables["course_element"]
         course_element = course_element.rename(
             columns={
@@ -106,10 +110,12 @@ class SkipsPercentage(Metric):
                 "element_type": "course_element_type",
             }
         )
-        user_element_progress = self.data_tables["user_element_progress"][
-            self.data_tables["user_element_progress"]["course_id"]
-            == self.parameters["course_id"]
-        ]
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
         df = user_element_progress[
             user_element_progress["course_element_type"] == "task"
         ]
@@ -156,11 +162,13 @@ class SkipsPercentage(Metric):
 
 
 class LostPercentage(Metric):
-    def evaluate(self, *args, **kwargs):
-        user_element_progress = self.data_tables["user_element_progress"][
-            self.data_tables["user_element_progress"]["course_id"]
-            == self.parameters["course_id"]
-        ]
+    def evaluate(self, course_id=None, *args, **kwargs):
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
         df = user_element_progress[
             user_element_progress["course_element_type"] == "task"
         ]
@@ -222,11 +230,13 @@ class LostPercentage(Metric):
 
 
 class GuessedPercentage(Metric):
-    def evaluate(self, *args, **kwargs):
-        user_element_progress = self.data_tables["user_element_progress"][
-            self.data_tables["user_element_progress"]["course_id"]
-            == self.parameters["course_id"]
-        ]
+    def evaluate(self, course_id=None, *args, **kwargs):
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
         df = user_element_progress[
             user_element_progress["course_element_type"] == "task"
         ]
@@ -285,16 +295,45 @@ class GuessedPercentage(Metric):
         )
 
 
+class SolvedPercentage(Metric):
+    def evaluate(self, course_id=None):
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress=user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"]
+                == course_id
+            ]
+        df = user_element_progress[
+            user_element_progress["course_element_type"] == "task"
+        ]
+        df = df[df["achieve_reason"] != "transferred"]
+        df = df[df["tries_count"] > 0]
+        df["is_achieved"] = df["is_achieved"].fillna(False).astype(int)
+        grouped = (
+            df[["course_element_id", "is_achieved", "user_id"]]
+            .groupby("course_element_id")
+            .agg({"user_id": "count", "is_achieved": "sum"})
+            .reset_index()
+        )
+        solved_percentage = pd.DataFrame(
+            {
+                "element_id": grouped["course_element_id"],
+                self.metric_name: grouped["is_achieved"] / grouped["user_id"],
+            }
+        )
+        return solved_percentage
+
+
 ### EXAMPLE
 
-# course_id = 1316
-# mtc = MeanTriesCount(metric_name='mean_tries_count', data_tables={'user_element_progress': user_element_progress}, 
-#                     parameters={'outlier': 65, 'course_id': course_id}, threshold=4)
-# std = TriesStd(metric_name='tries_std', data_tables={'user_element_progress': user_element_progress}, 
-#                     parameters={'outlier': 65, 'course_id': course_id}, threshold=5)
-# skips = SkipsPercentage(metric_name='skips_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element}, 
+# mtc = MeanTriesCount(metric_name='mean_tries_count', data_tables={'user_element_progress': user_element_progress},
+#                     parameters={'outlier': 65}, threshold=4)
+# std = TriesStd(metric_name='tries_std', data_tables={'user_element_progress': user_element_progress},
+#                     parameters={'outlier': 65}, threshold=5)
+# skips = SkipsPercentage(metric_name='skips_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element},
+#                     parameters={}, threshold=0.2)
+# lost = LostPercentage(metric_name='lost_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element},
+#                     parameters={}, threshold=0.15)
+# guess = GuessedPercentage(metric_name='guessed_percentage', data_tables={'user_element_progress': user_element_progress, 'solution_log': solution_log},
 #                     parameters={'course_id': course_id}, threshold=0.2)
-# lost = LostPercentage(metric_name='lost_percentage', data_tables={'user_element_progress': user_element_progress, 'course_element': course_element}, 
-#                     parameters={'course_id': course_id}, threshold=0.15)
-# guess = GuessedPercentage(metric_name='guessed_percentage', data_tables={'user_element_progress': user_element_progress, 'solution_log': solution_log}, 
-#                     parameters={'course_id': course_id}, threshold=0.2)
+# sp = SolvedPercentage('solved_percentage', threshold=0.88, parameters={},data_tables={'user_element_progress': user_element_progress})
