@@ -87,3 +87,9 @@ class percentage_tries(Metric):
                 dict_metric[task].append(metric_for_user)
             dict_metric[task] = round(np.mean(dict_metric[task]), 2)
         return pd.DataFrame({'element_id' : dict_metric.keys(), self.metric_name : dict_metric.values()})
+
+
+## EXAMPLES
+#N_tries_object = N_tries(metric_name='N_tries', threshold=10, parameters={'N' : 7}, data_tables=ml_course_info)
+#diff_tries_object = diff_tries(metric_name='diff_tries', threshold=1, parameters={}, data_tables=ml_course_info)
+#percentage_tries_object = percentage_tries(metric_name='percentage_tries', threshold=0.9, parameters={}, data_tables=ml_course_info)
