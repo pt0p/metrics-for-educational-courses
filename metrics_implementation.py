@@ -50,7 +50,7 @@ class MeanTriesCount(Metric):
         df = df[df["course_element_type"] == "task"]
         df = df[df["achieve_reason"] != "transferred"]
         df_filtered = df[df["tries_count"] < outlier_threshhold]
-        df_filtered = df[df["tries_count"] > 0]
+        df_filtered = df_filtered[df_filtered["tries_count"] > 0]
         return df_filtered
 
     def evaluate(self, course_id=None, *args, **kwargs):
@@ -78,7 +78,7 @@ class TriesStd(Metric):
         df = df[df["course_element_type"] == "task"]
         df = df[df["achieve_reason"] != "transferred"]
         df_filtered = df[df["tries_count"] < outlier_threshhold]
-        df_filtered = df[df["tries_count"] > 0]
+        df_filtered = df_filtered[df_filtered["tries_count"] > 0]
         return df_filtered
 
     def evaluate(self, course_id=None, *args, **kwargs):
@@ -242,7 +242,7 @@ class GuessedPercentage(Metric):
         ]
         df = df[df["achieve_reason"] != "transferred"]
         df_tried = df[df["tries_count"] > 0]
-        solution_log = self.data_tables["solution_log"]
+        solution_log = self.data_tables["solution_log"].copy()
         solution_log["submission_time"] = pd.to_datetime(
             solution_log["submission_time"]
         )
