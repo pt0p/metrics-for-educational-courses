@@ -1,0 +1,94 @@
+:root{
+    --graph-with-table-width : 90vw;
+    --graph-with-table-pos : calc(50vw - var(--graph-with-table-width) / 2);
+    --graph-width : 50vw;
+    --graph-table-pos : calc(var(--graph-with-table-pos) + var(--graph-width));
+}
+body {
+    font-family: Arial;
+    line-height : 1.5;
+    margin-left : 40px;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #1f2328;
+    font-family: Arial;
+}
+.flex {
+    display : flex;
+}
+.course-dates {
+    margin-bottom : 7px;
+}
+.factoid {
+    width : min(15vw, 15rem);
+    margin-right : 2vw;
+    margin-bottom : 10px;
+    border: solid;
+    border-color : #d0d7ee;
+    border-width : 1px;
+    border-radius : 4px;
+    /* display: flex; */
+    flex-direction: column;
+    justify-content: space-between;
+    padding-left : 10px;
+    padding-right : 10px;
+    padding-bottom : 0px;
+    line-height : 1;
+    box-shadow : 0px 3px 6px 0px #424a531f;
+}
+.factoid-header {
+    text-align: center;
+    word-wrap : break-word;
+}
+.factoid-text {
+    text-align: center;
+    font-size : 36px;
+    word-wrap : break-word;
+}
+.graph{
+    width : var(--graph-width);
+    overflow-y : auto;
+}
+.graph-table{
+    overflow-y : auto;
+    position : absolute;
+    bottom : 0;
+    left : var(--graph-table-pos);
+}
+.graph-with-table{
+    display : flex;
+    flex-direction : row;
+    align-items : bottom;
+}
+.dropdown-graph-table {
+    width : var(--graph-with-table-width);
+    overflow : auto;
+    position : absolute;
+    left : var(--graph-with-table-pos);
+    border: solid;
+    border-color : #d0d7ee;
+    border-width : 1px;
+    border-radius : 4px;
+    box-shadow : 0px 3px 6px 0px #424a531f;
+}
+
+.vspace{
+    height : 1000px;
+}
+.module-link a:link{
+    color : black;
+    font-size : 14px;
+}
+
+.module-report {
+    border-top: solid;
+    border-top-color : #1f2328;
+    border-top-width : 1px;
+}
+.module-table {
+    overflow-y : auto;
+}
+
+.cell-rect {
+    padding-bottom: 2px;
+}
