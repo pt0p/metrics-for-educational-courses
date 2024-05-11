@@ -137,7 +137,7 @@ class SkipsPercentage(Metric):
         # запись о пользователе-элементе в user_element_progress есть только тогда, когда задача открыта пользователю
         user_count = skips_data.groupby(by="course_element_id").count()["user_id"]
 
-        skips_percentage = skips_count / user_count
+        skips_percentage = skips_count / user_count * 100
         return pd.DataFrame(
             {
                 "element_id": skips_percentage.index,
@@ -216,7 +216,7 @@ class LostPercentage(Metric):
         )
         lost_count = counts_df["is_lost"]
         solved_prev_count = counts_df["prev_is_solved"]
-        lost_percentage = lost_count / solved_prev_count
+        lost_percentage = lost_count / solved_prev_count * 100
 
         return pd.DataFrame(
             {
@@ -282,7 +282,7 @@ class GuessedPercentage(Metric):
             .groupby("course_element_id")
             .count()["tries_count"]
         )
-        guessed_percentage = guessed_count / tried_count
+        guessed_percentage = guessed_count / tried_count * 100
         return pd.DataFrame(
             {
                 "element_id": guessed_percentage.index,
@@ -313,7 +313,7 @@ class SolvedPercentage(Metric):
         solved_percentage = pd.DataFrame(
             {
                 "element_id": grouped["course_element_id"],
-                self.metric_name: grouped["is_achieved"] / grouped["user_id"],
+                self.metric_name: grouped["is_achieved"] / grouped["user_id"] * 100,
             }
         )
         return solved_percentage
@@ -367,7 +367,7 @@ class ModuleAchievedPercentage(Metric):
         achieved_percentage = pd.DataFrame(
             {
                 "module_id": agg_df["course_module_id"],
-                self.metric_name: agg_df["is_achieved"] / agg_df["user_id"],
+                self.metric_name: agg_df["is_achieved"] / agg_df["user_id"] * 100,
             }
         )
         return achieved_percentage
