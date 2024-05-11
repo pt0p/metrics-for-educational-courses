@@ -4,6 +4,7 @@ from pandas import DataFrame
 from typing import List, Dict, Union, Tuple
 from abc import ABC, abstractmethod
 from tqdm import tqdm
+from datetime import timedelta
 
 
 class Metric(ABC):
@@ -324,6 +325,85 @@ class SolvedPercentage(Metric):
         return solved_percentage
 
 
+class ModuleUserCount(Metric):
+    def evaluate(self, course_id=None):
+        user_module_progress = self.data_tables['user_module_progress'].copy()
+        user_element_progress = self.data_tables['user_element_progress'].copy()
+        if course_id != None:
+            user_module_progress = user_module_progress[user_module_progress['course_id'] == course_id]
+            user_element_progress = user_element_progress[user_element_progress['course_id'] == course_id]
+        df = filter_module_progress(user_module_progress, user_element_progress)
+        user_count = df.groupby('course_module_id').agg(user_count=('user_id', pd.Series.nunique)).reset_index().rename(columns={'course_module_id': 'module_id', 'user_count': self.metric_name})
+        return user_count
+
+class ModuleAchievedPercentage(Metric):
+    def evaluate(self, course_id=None):
+        user_module_progress = self.data_tables['user_module_progress'].copy()
+        user_element_progress = self.data_tables['user_element_progress'].copy()
+        if course_id != None:
+            user_module_progress = user_module_progress[user_module_progress['course_id'] == course_id]
+            user_element_progress = user_element_progress[user_element_progress['course_id'] == course_id]
+        df = filter_module_progress(user_module_progress, user_element_progress)
+
+        agg_df = (
+            df[["course_module_id", "is_achieved", "user_id"]]
+            .groupby(["course_module_id"])
+            .agg({"user_id": "count", "is_achieved": "sum"})
+            .reset_index()
+        )     
+        achieved_percentage = pd.DataFrame(
+            {
+                "module_id": agg_df["course_module_id"],
+                self.metric_name: agg_df["is_achieved"] / agg_df["user_id"],
+            }
+        )
+        return achieved_percentage
+
+class ModuleTime(Metric):
+    def evaluate(self, course_id=None):
+        user_module_progress = self.data_tables['user_module_progress'].copy()
+        user_element_progress = self.data_tables['user_element_progress'].copy()
+        solution_log = self.data_tables['solution_log'].copy()
+        if course_id != None:
+            user_module_progress = user_module_progress[user_module_progress['course_id'] == course_id]
+            user_element_progress = user_element_progress[user_element_progress['course_id'] == course_id]
+
+        element_progress = user_element_progress[['user_id', 'course_element_type', 'course_module_id', 'time_achieved']]
+        element_progress['element_progress_id'] = user_element_progress['id']
+        log = solution_log[['id', 'element_progress_id', 'submission_time']]
+        df = log.merge(element_progress, on='element_progress_id', how='outer')
+        columns = ['course_module_id', 'user_id', 'action_time']
+        
+        no_tasks = df[df['course_element_type'] != 'task']
+        no_tasks['action_time'] = no_tasks['time_achieved']
+        no_tasks = no_tasks[columns].dropna()
+
+        tasks = df[df['course_element_type'] == 'task']
+        tasks['action_time'] = tasks['submission_time']
+        tasks = tasks[columns].dropna()
+
+        actions = pd.concat([tasks, no_tasks])
+        max_delta = timedelta(minutes=self.parameters['max_timedelta_min'])
+        module_times = {}
+        
+        for name, group in tqdm(actions.groupby(['course_module_id', 'user_id'])):
+            group = group.sort_values(by='action_time')
+            group['action_time'] = pd.to_datetime(group['action_time'])
+            group['time_delta'] = group['action_time'] - group['action_time'].shift()
+            group = group[group['time_delta'] < max_delta]
+            if name[0] in module_times.keys():
+                module_times[name[0]].append(group['time_delta'].sum())
+            else:
+                module_times[name[0]] = [group['time_delta'].sum()]
+
+        for module in module_times.keys():
+            module_times[module] = np.mean(module_times[module])
+            
+        mean_module_time = pd.DataFrame({'module_id': module_times.keys(), self.metric_name: module_times.values()})
+        mean_module_time[self.metric_name] = mean_module_time[self.metric_name].apply(lambda x: x.total_seconds()/60)
+        return mean_module_time
+
+
 ### EXAMPLE
 
 # mtc = MeanTriesCount(metric_name='mean_tries_count', data_tables={'user_element_progress': user_element_progress},
@@ -337,3 +417,6 @@ class SolvedPercentage(Metric):
 # guess = GuessedPercentage(metric_name='guessed_percentage', data_tables={'user_element_progress': user_element_progress, 'solution_log': solution_log},
 #                     parameters={'course_id': course_id}, threshold=0.2)
 # sp = SolvedPercentage('solved_percentage', threshold=0.88, parameters={},data_tables={'user_element_progress': user_element_progress})
+# user_count_metric = ModuleUserCount(metric_name='user_count', data_tables=data_tables, threshold=None, parameters=None)
+# achieved_metric = ModuleAchievedPercentage(metric_name='achieved_percentage', data_tables=data_tables, threshold=None, parameters=None)
+# module_time_metric = ModuleTime(metric_name='module_time', data_tables=data_tables, threshold=None, parameters={'max_timedelta_min': 40})
