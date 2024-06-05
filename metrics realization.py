@@ -35,7 +35,7 @@ class N_tries(Metric):
                 tries = np.array(user_tries['tries_count'])
                 count += tries.size != 0
             unique_tasks = np.unique(np.array(tasks[tasks['course_element_id'] == task]['user_id']))
-            dict_metric[task] = int(100 * count / unique_tasks.size)
+            dict_metric[task] = int(100 * count / unique_tasks.size) / 100
         return pd.DataFrame({'element_id' : dict_metric.keys(), self.metric_name : dict_metric.values()})
 
 class diff_tries(Metric):
