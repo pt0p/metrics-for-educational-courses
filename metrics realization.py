@@ -88,8 +88,29 @@ class percentage_tries(Metric):
             dict_metric[task] = round(np.mean(dict_metric[task]), 2)
         return pd.DataFrame({'element_id' : dict_metric.keys(), self.metric_name : dict_metric.values()})
 
+class ModuleMeanTries(Metric):
+    def evaluate(self, course_id=None):
+        tasks = self.data_tables['user_element_progress'][(ml_course_info['user_element_progress']["course_element_type"] == "task") &
+                                                (ml_course_info['user_element_progress']["achieve_reason"] != "transferred")]
+        modules = np.unique(np.array(tasks['course_module_id']))
+        metric_values = {}
+        for module_id in modules:
+            if self.data_tables['course_module'][self.data_tables['course_module']['id'] == module_id]['is_advanced'].iloc[0]:
+                continue
+            tasks_module = tasks[tasks['course_module_id'] == module_id]
+            users = np.unique(np.array(tasks_module['user_id']))
+            avg_tries_for_user = []
+            for user in users:
+                user_tasks = tasks_module[(tasks_module['user_id'] == user) & (tasks_module['tries_count'] > 0)]
+                all_tries = np.array(user_tasks['tries_count']).sum()
+                if len(user_tasks) != 0:
+                    avg_tries_for_user.append(all_tries / len(user_tasks))
+            metric_values[module_id] = round(np.mean(avg_tries_for_user), 2)
+        return pd.DataFrame({'module_id' : metric_values.keys(), self.metric_name : metric_values.values()})
+
 
 ## EXAMPLES
 #N_tries_object = N_tries(metric_name='N_tries', threshold=10, parameters={'N' : 7}, data_tables=ml_course_info)
 #diff_tries_object = diff_tries(metric_name='diff_tries', threshold=1, parameters={}, data_tables=ml_course_info)
 #percentage_tries_object = percentage_tries(metric_name='percentage_tries', threshold=0.9, parameters={}, data_tables=ml_course_info)
+#mmt = ModuleMeanTries(metric_name='ModuleMeanTries', threshold=4, parameters={}, data_tables=ml_course_info)
