@@ -428,6 +428,27 @@ class ModuleTime(Metric):
         return mean_module_time
 
 
+class ElementUserCount(Metric):
+    def evaluate(self, course_id=None, *args, **kwargs):
+        user_element_progress = self.data_tables["user_element_progress"]
+        if course_id != None:
+            user_element_progress = user_element_progress[
+                self.data_tables["user_element_progress"]["course_id"] == course_id
+            ]
+        df = user_element_progress[
+            user_element_progress["course_element_type"] == "task"
+        ]
+        df = df[df["achieve_reason"] != "transferred"]
+        tried_progress = df[df["tries_count"] > 0]
+        user_count = tried_progress.groupby("course_element_id").agg(
+            {"user_id": "count"}
+        )
+        user_count = user_count.reset_index().rename(
+            columns={"course_element_id": "element_id", "user_id": self.metric_name}
+        )
+        return user_count
+
+
 ### EXAMPLE
 
 # mtc = MeanTriesCount(metric_name='mean_tries_count', data_tables={'user_element_progress': user_element_progress},
@@ -444,3 +465,4 @@ class ModuleTime(Metric):
 # user_count_metric = ModuleUserCount(metric_name='user_count', data_tables=data_tables, threshold=None, parameters=None)
 # achieved_metric = ModuleAchievedPercentage(metric_name='achieved_percentage', data_tables=data_tables, threshold=None, parameters=None)
 # module_time_metric = ModuleTime(metric_name='module_time', data_tables=data_tables, threshold=None, parameters={'max_timedelta_min': 40})
+# user_count_metric = ElementUserCount(metric_name='user_count', parameters=None, threshold=0, data_tables=data_tables)
