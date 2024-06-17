@@ -9,7 +9,7 @@ skips_percentage = SkipsPercentage(metric_name='доля пропусков',
                             parameters={}, threshold=[0.2, 0])
 skips_percentage.description = 'Доля пользователей, пропустивших задачу, среди тех, кому она открыта. Задача пропущена, если пользователь решил задачу, расположенную позже в модуле, раньше текущей (или не решил текущую задачу).'
 
-lost_percentage =  LostPercentage(metric_name='доля не решивших',
+lost_percentage =  LostPercentage(metric_name='доля нерешивших среди продолжающих',
                             parameters={}, threshold =[0.15,0])
 lost_percentage.description = 'Доля пользователей, не решивших задачу, среди решивших предыдущую. Не определена для задач после видео или текстовых материалов.'
 
