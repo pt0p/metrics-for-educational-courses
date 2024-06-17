@@ -29,7 +29,10 @@ n_tries = NTries(metric_name='доля решивших за много попы
                  parameters={'N' : 7}, threshold=[0.1, 0])
 n_tries.description = f'Доля пользователей, решивших задачу не менее чем с {n_tries.parameters['N'] попытки}'
 
-default_element_metrics = [solved_percentage, mean_tries, guessed_percentage, n_tries, mean_time, lost_percentage, skips_percentage]
+element_user_count = ElementUserCount(metric_name='число попытавшихся учеников', parameters=None, threshold=0, data_tables=data_tables)
+element_user_count.description = "Количество пользователей, совершивших хотя бы одну попытку по задаче."
+
+default_element_metrics = [element_user_count, solved_percentage, mean_tries, guessed_percentage, n_tries, mean_time, lost_percentage, skips_percentage]
 
 # Метрики сложности модуля:
 
