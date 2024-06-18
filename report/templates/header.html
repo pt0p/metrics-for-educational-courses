@@ -1,0 +1,10 @@
+<h1 class="report-header"> Введение в машинное обучение (ID = {{course_id}})</h1>
+<div class="course-dates mb30">
+    <div> Дата открытия курса: {{start}} </div>
+    <div> Дата закрытия курса: {{close}} </div>
+</div>
+<div class="flex mb30">
+    {% for course_factoid in course_factoids %}
+        {{course_factoid}}
+    {% endfor %}
+</div>

@@ -1,0 +1,23 @@
+<div class="module-report", id="{{id}}">
+    <div>
+        <h3 class="module-header">
+            <span>{{module_name}}</span>
+            <span>[<a href="#module_0">вернуться к карте курса &uarr;</a>]</span>
+        </h3>
+    </div>
+    <div class="minimap">
+        {{minimap}}
+    </div>
+    <div class="flex factoids">
+        {% for factoid in factoids %}
+            {{factoid}}
+        {% endfor %}
+    </div>
+    <br>
+    <div class="recomendations">
+        {{personal_recomendations}}
+    </div>
+    <h4>Подробный анализ модуля:</h4>
+    {{module_table}}
+    {{module_bar}}
+</div>

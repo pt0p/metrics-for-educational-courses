@@ -5,9 +5,9 @@ from abc import ABC, abstractmethod
 
 
 class Metric(ABC):
-    def __init__(self, metric_name: str, threshold,
-                 parameters: Dict[str, float],
-                 data_tables: Union[List[DataFrame], Dict[str, DataFrame]]) -> None:
+    def __init__(self, metric_name: str = None, threshold = None,
+                 parameters: Dict[str, float] = None,
+                 data_tables: Union[List[DataFrame], Dict[str, DataFrame]] = None) -> None:
         self.metric_name = metric_name
         self.threshold = threshold
         self.parameters = parameters

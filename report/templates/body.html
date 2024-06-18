@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        {{style_sheet}}
+    </style>
+</head>
+<html>
+    <body>
+        {{header}}
+        {{map}}
+        {{course_table}}
+        <h2>Общий анализ курса</h2>
+        {{course_recomendations}}
+        <h2>Выгрузка вееров по задачам</h2>
+        <p>Для каждой задачи в данном запуске курса есть возможность выгрузить веера по ней:</p>
+        {{fans_downloader}}
+        <h2>Анализ каждого модуля</h2>
+        {% for module in modules_list %}
+            {{module}}
+        {% endfor %}
+    </body>
+</html>
